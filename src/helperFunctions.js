@@ -527,3 +527,18 @@ function createSeriesObject(dataPoints, color) {
 
 // Example usage:
 export const testModifiedData = transformData(data);
+
+function randomizeIgnition(data) {
+  let currentState = Math.random() < 0.5; // Randomly start with true or false
+  let remainingCount = Math.floor(Math.random() * 8) + 3; // Between 3 and 10
+
+  return data.map((entry, index) => {
+    if (remainingCount === 0) {
+      currentState = !currentState; // Toggle ignition state
+      remainingCount = Math.floor(Math.random() * 8) + 3; // Reset counter
+    }
+
+    remainingCount--;
+    return { ...entry, ignition: currentState };
+  });
+}

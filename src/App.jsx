@@ -8,11 +8,12 @@ import { originalData } from "./fakeData";
 import { useEffect, useState } from "react";
 
 function App() {
-  console.log("testModifiedData", { testModifiedData });
   const [data, setData] = useState([]);
   useEffect(() => {
     setData(transformData(originalData));
   }, []);
+
+  console.log("data", { data });
 
   const option = {
     title: { text: "Fuel Level Over Time" },
