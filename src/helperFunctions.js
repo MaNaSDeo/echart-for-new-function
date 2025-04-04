@@ -1,3 +1,5 @@
+import * as echarts from "echarts";
+
 export const data = [
   {
     device_timestamp: 1735257741000,
@@ -255,7 +257,7 @@ export const modifiedData = [
         1735260001000,
         225.75,
         {
-          device_timestamp: 1735260001000,
+          device_timestamp: 1735260000999,
           speed: 48,
           ignition: true,
           level: 225.75,
@@ -423,36 +425,206 @@ export const modifiedData = [
       ],
     ],
   },
+  {
+    type: "line",
+    lineStyle: {
+      type: "solid",
+      color: "red",
+    },
+    // symbol: "triangle",
+    symbol: `image://src/component/img/logogoogle.svg`,
+    symbolSize: 20,
+    data: [
+      [
+        1735260001000,
+        225.75,
+        {
+          device_timestamp: 1735260001000,
+          speed: 0,
+          ignition: false,
+          level: 225.75,
+          isLowNetwork: true,
+          status: "REFUELING",
+          address:
+            "Coimbatore - Nagapattinam Hwy, Annai Meena Nagar, Alangudi Bit, Punnainallur, Tamil Nadu 613501",
+          fuel_reading_count: "236.75 L",
+          status_display_text: "Refuel",
+          end_time: null,
+          start_time: null,
+        },
+      ],
+    ],
+    areaStyle: {
+      color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+        { offset: 0, color: "#ACD4FD" },
+        { offset: 1, color: "#F5FAFF" },
+      ]),
+    },
+  },
+];
+
+const lowNetworkOnes = [
+  {
+    type: "line",
+    lineStyle: {
+      type: "dashed", // Dashed gray line
+      color: "gray",
+    },
+    symbol: "none",
+    areaStyle: {
+      color: "white",
+    },
+    data: [
+      [
+        1735260001000,
+        // (x-ordinate i.e. device_timestamp),
+        225.75,
+        // (y-ordinate i.e. level, so will look in data for same device_timestamp and use the level from there.)
+        {
+          device_timestamp: 1735260001001,
+          // (came from 1735260001000+1)
+        },
+      ],
+      [
+        1735260601000,
+        // (comes from (1735260001000+1735261201000)/2),
+        287.875,
+        // (comes from (350+225.75)/2, 350 if fuel level of 1735261201000 and 225.75 is of 1735260001000)
+        {
+          device_timestamp: 1735260601001,
+          // (came from 1735260601000+1)
+        },
+      ],
+    ],
+  },
+  {
+    type: "line",
+    lineStyle: {
+      type: "dashed", // Dashed gray line
+      color: "gray",
+    },
+    symbol: "none",
+    areaStyle: {
+      color: "white",
+    },
+    data: [
+      [
+        1735260601000,
+        // (comes from (1735260001000+1735261201000)/2),
+        287.875,
+        // (comes from (350+225.75)/2, 350 if fuel level of 1735261201000 and 225.75 is of 1735260001000)
+        {
+          device_timestamp: 1735260601000,
+          start_time: 1735260001000,
+          end_time: 1735261201000,
+          status: "LOW_NETWORK",
+        },
+      ],
+    ],
+  },
+  {
+    type: "line",
+    lineStyle: {
+      type: "dashed", // Dashed gray line
+      color: "gray",
+    },
+    symbol: "none",
+    areaStyle: {
+      color: "white",
+    },
+    data: [
+      [
+        1735260601000,
+        // (comes from (1735260001000+1735261201000)/2),
+        287.875,
+        // (comes from (350+225.75)/2, 350 if fuel level of 1735261201000 and 225.75 is of 1735260001000)
+        {
+          device_timestamp: 1735260601001,
+        },
+      ],
+      [
+        1735261201000,
+        // (x-ordinate i.e. device_timestamp),
+        350,
+        // (y-ordinate i.e. level, so will look in data for same device_timestamp and use the level from there.)
+        {
+          device_timestamp: 17352612010001,
+          // (came from 1735261201000+1)
+        },
+      ],
+    ],
+  },
 ];
 
 /**
- * Transforms the original data into a modified format based on ignition value changes
- * @param {Array} originalData - The original data array
- * @returns {Array} The transformed data in the format needed
+ * Transforms the original data based on ignition changes, low network plots, and fuel timeline events
+ * @param {Array} data - The original data array
+ * @param {Array} lowNetworkPlots - Low network time periods
+ * @param {Array} fuelTimeline - Fuel events (theft, refueling)
+ * @returns {Array} The transformed data in the required format
  */
-export function transformData(originalData) {
-  const result = [];
+export function transformData(data, lowNetworkPlots, fuelTimeline) {
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return [];
+  }
+
+  // Step 1: Create a set of fuel timeline timestamps
+  const fuelTimelineTimestamps = new Set();
+  if (fuelTimeline && Array.isArray(fuelTimeline)) {
+    fuelTimeline.forEach((event) => {
+      if (event.start_location && event.start_location.device_timestamp) {
+        fuelTimelineTimestamps.add(event.start_location.device_timestamp);
+      }
+    });
+  }
+
+  // Step 2: Process and normalize the data
+  const normalizedData = data
+    .map((item) => {
+      // Round the timestamp to nearest 1000
+      const roundedTimestamp = Math.floor(item.device_timestamp / 1000) * 1000;
+
+      // Adjust level if it's 0
+      const adjustedLevel = item.level === 0 ? 0.001 : item.level;
+
+      return {
+        ...item,
+        device_timestamp: roundedTimestamp,
+        level: adjustedLevel,
+      };
+    })
+    // Sort by device_timestamp
+    .sort((a, b) => a.device_timestamp - b.device_timestamp);
+
+  // Step 3: Transform the data
+  let result = [];
   let currentSeries = [];
-  let currentIgnitionState = originalData[0].ignition;
+
+  if (normalizedData.length === 0) {
+    return result;
+  }
+
+  let currentIgnitionState = normalizedData[0].ignition;
   let seriesColor = currentIgnitionState ? "blue" : "yellow";
 
   // Create the first data point
   currentSeries.push([
-    originalData[0].device_timestamp,
-    originalData[0].level,
-    { ...originalData[0] },
+    normalizedData[0].device_timestamp,
+    normalizedData[0].level,
+    { ...normalizedData[0] },
   ]);
 
   // Process the rest of the data
-  for (let i = 1; i < originalData.length; i++) {
-    const currentData = originalData[i];
+  for (let i = 1; i < normalizedData.length; i++) {
+    const currentData = normalizedData[i];
+    const prevData = normalizedData[i - 1];
 
     // Check if ignition state has changed
     if (currentData.ignition !== currentIgnitionState) {
       // Finalize the current series
       result.push(createSeriesObject(currentSeries, seriesColor));
 
-      // Start a new series with a copy of the last point but with timestamp+1
+      // Start a new series with a copy of the last point but with timestamp + 1
       const lastPoint = currentSeries[currentSeries.length - 1];
       const continuityPoint = [
         lastPoint[0],
@@ -471,11 +643,17 @@ export function transformData(originalData) {
       currentSeries = [continuityPoint];
     }
 
+    // Special case: if this timestamp is in fuel timeline, adjust the device_timestamp in the data object
+    let dataObj = { ...currentData };
+    if (fuelTimelineTimestamps.has(currentData.device_timestamp)) {
+      dataObj.device_timestamp = currentData.device_timestamp - 1;
+    }
+
     // Add current data point to the current series
     currentSeries.push([
       currentData.device_timestamp,
       currentData.level,
-      { ...currentData },
+      dataObj,
     ]);
   }
 
@@ -483,6 +661,18 @@ export function transformData(originalData) {
   if (currentSeries.length > 0) {
     result.push(createSeriesObject(currentSeries, seriesColor));
   }
+
+  // Step 6: Generate fuel timeline events series
+  if (fuelTimeline && Array.isArray(fuelTimeline) && fuelTimeline.length > 0) {
+    const fuelEventSeries = createFuelTimelineSeries(
+      fuelTimeline,
+      timestampToLevelMap,
+      isInLowNetworkPeriod
+    );
+    result.push(fuelEventSeries);
+  }
+
+  result = [...result, lowNetworkOnes];
 
   return result;
 }
@@ -541,4 +731,100 @@ function randomizeIgnition(data) {
     remainingCount--;
     return { ...entry, ignition: currentState };
   });
+}
+
+/**
+ * Creates a series for fuel timeline events
+ * @param {Array} fuelTimeline - The fuel timeline events
+ * @param {Map} timestampToLevelMap - Map of timestamps to level values
+ * @param {Function} isInLowNetworkPeriod - Function to check if timestamp is in low network period
+ * @returns {Object} The fuel timeline series object
+ */
+function createFuelTimelineSeries(
+  fuelTimeline,
+  timestampToLevelMap,
+  isInLowNetworkPeriod
+) {
+  const fuelEventPoints = [];
+
+  fuelTimeline.forEach((event) => {
+    if (!event.start_location || !event.start_location.device_timestamp) {
+      return;
+    }
+
+    const timestamp = event.start_location.device_timestamp;
+
+    // Find the level for this timestamp
+    let level = 0;
+    if (timestampToLevelMap.has(timestamp)) {
+      level = timestampToLevelMap.get(timestamp);
+    } else {
+      // If exact timestamp not found, find the closest earlier timestamp
+      const timestamps = Array.from(timestampToLevelMap.keys()).sort(
+        (a, b) => a - b
+      );
+      let closestTimestamp = null;
+
+      for (let i = 0; i < timestamps.length; i++) {
+        if (timestamps[i] <= timestamp) {
+          closestTimestamp = timestamps[i];
+        } else {
+          break;
+        }
+      }
+
+      if (closestTimestamp !== null) {
+        level = timestampToLevelMap.get(closestTimestamp);
+      } else if (timestamps.length > 0) {
+        // If no earlier timestamp found, use the earliest available
+        level = timestampToLevelMap.get(timestamps[0]);
+      }
+    }
+
+    // Get the logo based on status
+    const logo =
+      event.status === "REFUELING"
+        ? // ? "image://src/component/img/refuelLogo.svg"
+          // : "image://src/component/img/theftLogo.svg";
+          `image://src/component/img/logogoogle.svg`
+        : `image://src/component/img/logogoogle.svg`;
+
+    // Create the point data object
+    const pointData = {
+      device_timestamp: timestamp,
+      speed: 0, // Default values
+      ignition: false, // Default values
+      level: level,
+      isLowNetwork: isInLowNetworkPeriod(timestamp),
+      status: event.status,
+      address: event.start_location.address?.full_address || "",
+      fuel_reading_count: event.fuel_reading_count || "",
+      status_display_text: event.status_display_text || "",
+      end_time: null,
+      start_time: null,
+    };
+
+    fuelEventPoints.push([timestamp, level, pointData]);
+  });
+
+  // Create and return the fuel event series
+  return {
+    type: "line",
+    lineStyle: {
+      type: "solid",
+      color: "red", // Using red color for fuel events
+    },
+    symbol: (value, params) => {
+      // Determine which logo to use based on the status in the data
+      const dataPoint = params.data[2];
+      return dataPoint && dataPoint.status === "REFUELING"
+        ? "image://src/component/img/refuelLogo.svg"
+        : "image://src/component/img/theftLogo.svg";
+    },
+    symbolSize: 20,
+    data: fuelEventPoints,
+    areaStyle: {
+      color: "white", // White area style for fuel events
+    },
+  };
 }
