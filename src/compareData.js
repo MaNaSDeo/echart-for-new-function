@@ -239,7 +239,6 @@ export const modifiedData = [
           speed: 42,
           ignition: true,
           level: 93.5,
-          isLowNetwork: true,
         },
       ],
     ],
@@ -280,7 +279,16 @@ export const modifiedData = [
           speed: 0,
           ignition: true,
           level: 249,
-          isLowNetwork: true,
+        },
+      ],
+      [
+        1735351308000,
+        249,
+        {
+          device_timestamp: 1735351308000,
+          speed: 0,
+          ignition: true,
+          level: 249,
         },
       ],
     ],
@@ -289,7 +297,7 @@ export const modifiedData = [
     type: "line",
     lineStyle: {
       type: "solid",
-      color: "yellow",
+      color: "green",
     },
     symbol: "none",
     areaStyle: {
@@ -314,14 +322,13 @@ export const modifiedData = [
     },
     data: [
       [
-        1735351308000,
-        249,
+        1735351528000,
+        224.25,
         {
-          device_timestamp: 1735351308001,
+          device_timestamp: 1735351528000,
           speed: 0,
-          ignition: true,
-          level: 249,
-          isLowNetwork: true,
+          ignition: false,
+          level: 224.25,
         },
       ],
       [
@@ -332,7 +339,6 @@ export const modifiedData = [
           speed: 0,
           ignition: false,
           level: 224.25,
-          isLowNetwork: false,
         },
       ],
       [
@@ -343,7 +349,6 @@ export const modifiedData = [
           speed: 0,
           ignition: false,
           level: 190.5,
-          isLowNetwork: false,
         },
       ],
       [
@@ -354,7 +359,6 @@ export const modifiedData = [
           speed: 0,
           ignition: false,
           level: 156.75,
-          isLowNetwork: false,
         },
       ],
       [
@@ -365,7 +369,6 @@ export const modifiedData = [
           speed: 0,
           ignition: false,
           level: 123,
-          isLowNetwork: false,
         },
       ],
       [
@@ -376,7 +379,6 @@ export const modifiedData = [
           speed: 0,
           ignition: false,
           level: 89.25,
-          isLowNetwork: false,
         },
       ],
     ],
@@ -417,7 +419,16 @@ export const modifiedData = [
           speed: 0,
           ignition: true,
           level: 55.5,
-          isLowNetwork: false,
+        },
+      ],
+      [
+        1735353028000,
+        55.5,
+        {
+          device_timestamp: 1735353028000,
+          speed: 0,
+          ignition: true,
+          level: 55.5,
         },
       ],
       [
@@ -428,7 +439,6 @@ export const modifiedData = [
           speed: 52,
           ignition: true,
           level: 21.75,
-          isLowNetwork: false,
         },
       ],
       [
@@ -439,7 +449,6 @@ export const modifiedData = [
           speed: 52,
           ignition: true,
           level: 0,
-          isLowNetwork: true,
         },
       ],
     ],
@@ -480,7 +489,16 @@ export const modifiedData = [
           speed: 0,
           ignition: true,
           level: 267.39,
-          isLowNetwork: true,
+        },
+      ],
+      [
+        1735449756000,
+        267.39,
+        {
+          device_timestamp: 1735449756000,
+          speed: 0,
+          ignition: true,
+          level: 267.39,
         },
       ],
       [
@@ -491,7 +509,6 @@ export const modifiedData = [
           speed: 0,
           ignition: true,
           level: 208.25,
-          isLowNetwork: false,
         },
       ],
       [
@@ -502,7 +519,6 @@ export const modifiedData = [
           speed: 0,
           ignition: true,
           level: 137,
-          isLowNetwork: false,
         },
       ],
       [
@@ -513,7 +529,6 @@ export const modifiedData = [
           speed: 0,
           ignition: true,
           level: 113.25,
-          isLowNetwork: false,
         },
       ],
       [
@@ -524,7 +539,6 @@ export const modifiedData = [
           speed: 0,
           ignition: true,
           level: 118,
-          isLowNetwork: false,
         },
       ],
       [
@@ -535,7 +549,6 @@ export const modifiedData = [
           speed: 0,
           ignition: true,
           level: 122.75,
-          isLowNetwork: false,
         },
       ],
       [
@@ -546,7 +559,6 @@ export const modifiedData = [
           speed: 0,
           ignition: true,
           level: 127.5,
-          isLowNetwork: false,
         },
       ],
     ],
@@ -555,7 +567,7 @@ export const modifiedData = [
     type: "line",
     lineStyle: {
       type: "solid",
-      color: "yellow",
+      color: "green",
     },
     symbol: "none",
     areaStyle: {
@@ -587,7 +599,16 @@ export const modifiedData = [
           speed: 0,
           ignition: false,
           level: 132.25,
-          isLowNetwork: false,
+        },
+      ],
+      [
+        1735450716000,
+        132.25,
+        {
+          device_timestamp: 1735450716000,
+          speed: 0,
+          ignition: false,
+          level: 132.25,
         },
       ],
       [
@@ -598,7 +619,6 @@ export const modifiedData = [
           speed: 0,
           ignition: false,
           level: 137,
-          isLowNetwork: false,
         },
       ],
       [
@@ -609,7 +629,6 @@ export const modifiedData = [
           speed: 0,
           ignition: false,
           level: 141.75,
-          isLowNetwork: false,
         },
       ],
       [
@@ -620,7 +639,6 @@ export const modifiedData = [
           speed: 0,
           ignition: false,
           level: 146.5,
-          isLowNetwork: false,
         },
       ],
       [
@@ -631,7 +649,6 @@ export const modifiedData = [
           speed: 0,
           ignition: false,
           level: 151.25,
-          isLowNetwork: false,
         },
       ],
     ],

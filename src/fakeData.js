@@ -1,3 +1,5 @@
+import * as echarts from "echarts";
+
 export const low_network_plots = [
   //   {
   //     start_time: 1734805800000,
@@ -1866,5 +1868,561 @@ export const originalData = [
     speed: 0,
     ignition: false,
     level: 151.25,
+  },
+];
+
+export const data = [
+  {
+    device_timestamp: 1735257741000,
+    speed: 0,
+    ignition: false,
+    level: 234.75,
+  },
+  {
+    device_timestamp: 1735258041000,
+    speed: 0,
+    ignition: false,
+    level: 189.75,
+  },
+  {
+    device_timestamp: 1735258341000,
+    speed: 0,
+    ignition: false,
+    level: 186.75,
+  },
+  {
+    device_timestamp: 1735258641000,
+    speed: 0,
+    ignition: false,
+    level: 231.75,
+  },
+  {
+    device_timestamp: 1735258941000,
+    speed: 0,
+    ignition: false,
+    level: 289.13,
+  },
+  {
+    device_timestamp: 1735259241000,
+    speed: 0,
+    ignition: true,
+    level: 244.75,
+  },
+  {
+    device_timestamp: 1735259541000,
+    speed: 40,
+    ignition: true,
+    level: 237.25,
+  },
+  {
+    device_timestamp: 1735259841000,
+    speed: 37,
+    ignition: true,
+    level: 229.75,
+  },
+  {
+    device_timestamp: 1735260001000,
+    speed: 48,
+    ignition: true,
+    level: 225.75,
+  },
+  {
+    device_timestamp: 1735261201000,
+    speed: 0,
+    ignition: true,
+    level: 350,
+  },
+  {
+    device_timestamp: 1735261221000,
+    speed: 0,
+    ignition: false,
+    level: 310.87,
+  },
+  {
+    device_timestamp: 1735261241000,
+    speed: 0,
+    ignition: false,
+    level: 271.74,
+  },
+  {
+    device_timestamp: 1735261261000,
+    speed: 0,
+    ignition: false,
+    level: 249,
+  },
+  {
+    device_timestamp: 1735261281000,
+    speed: 0,
+    ignition: false,
+    level: 246.75,
+  },
+  {
+    device_timestamp: 1735261301000,
+    speed: 0,
+    ignition: false,
+    level: 244.5,
+  },
+  {
+    device_timestamp: 1735261321000,
+    speed: 0,
+    ignition: true,
+    level: 242.25,
+  },
+  {
+    device_timestamp: 1735261341000,
+    speed: 0,
+    ignition: true,
+    level: 240,
+  },
+];
+export const modifiedData = [
+  {
+    type: "line",
+    lineStyle: {
+      type: "solid",
+      color: "yellow",
+    },
+    symbol: "none",
+    areaStyle: {
+      color: {
+        colorStops: [
+          {
+            offset: 0,
+            color: "#ACD4FD",
+          },
+          {
+            offset: 1,
+            color: "#F5FAFF",
+          },
+        ],
+        x: 0,
+        y: 0,
+        x2: 0,
+        y2: 1,
+        type: "linear",
+        global: false,
+      },
+    },
+    data: [
+      [
+        1735257741000,
+        234.75,
+        {
+          device_timestamp: 1735257741000,
+          speed: 0,
+          ignition: false,
+          level: 234.75,
+        },
+      ],
+      [
+        1735258041000,
+        189.75,
+        {
+          device_timestamp: 1735258041000,
+          speed: 0,
+          ignition: false,
+          level: 189.75,
+        },
+      ],
+      [
+        1735258341000,
+        186.75,
+        {
+          device_timestamp: 1735258341000,
+          speed: 0,
+          ignition: false,
+          level: 186.75,
+        },
+      ],
+      [
+        1735258641000,
+        231.75,
+        {
+          device_timestamp: 1735258641000,
+          speed: 0,
+          ignition: false,
+          level: 231.75,
+        },
+      ],
+      [
+        1735258941000,
+        289.13,
+        {
+          device_timestamp: 1735258941000,
+          speed: 0,
+          ignition: false,
+          level: 289.13,
+        },
+      ],
+    ],
+  },
+  {
+    type: "line",
+    lineStyle: {
+      type: "solid",
+      color: "blue",
+    },
+    symbol: "none",
+    areaStyle: {
+      color: {
+        colorStops: [
+          {
+            offset: 0,
+            color: "#ACD4FD",
+          },
+          {
+            offset: 1,
+            color: "#F5FAFF",
+          },
+        ],
+        x: 0,
+        y: 0,
+        x2: 0,
+        y2: 1,
+        type: "linear",
+        global: false,
+      },
+    },
+    data: [
+      [
+        1735258941000,
+        289.13,
+        {
+          device_timestamp: 1735258941001,
+          speed: 0,
+          ignition: false,
+          level: 289.13,
+        },
+      ],
+      [
+        1735259241000,
+        244.75,
+        {
+          device_timestamp: 1735259241000,
+          speed: 0,
+          ignition: true,
+          level: 244.75,
+        },
+      ],
+      [
+        1735259541000,
+        237.25,
+        {
+          device_timestamp: 1735259541000,
+          speed: 40,
+          ignition: true,
+          level: 237.25,
+        },
+      ],
+      [
+        1735259841000,
+        229.75,
+        {
+          device_timestamp: 1735259841000,
+          speed: 37,
+          ignition: true,
+          level: 229.75,
+        },
+      ],
+      [
+        1735260001000,
+        225.75,
+        {
+          device_timestamp: 1735260000999,
+          speed: 48,
+          ignition: true,
+          level: 225.75,
+        },
+      ],
+      [
+        1735261201000,
+        350,
+        {
+          device_timestamp: 1735261201000,
+          speed: 0,
+          ignition: true,
+          level: 350,
+        },
+      ],
+    ],
+  },
+  {
+    type: "line",
+    lineStyle: {
+      type: "solid",
+      color: "yellow",
+    },
+    symbol: "none",
+    areaStyle: {
+      color: {
+        colorStops: [
+          {
+            offset: 0,
+            color: "#ACD4FD",
+          },
+          {
+            offset: 1,
+            color: "#F5FAFF",
+          },
+        ],
+        x: 0,
+        y: 0,
+        x2: 0,
+        y2: 1,
+        type: "linear",
+        global: false,
+      },
+    },
+    data: [
+      [
+        1735261201000,
+        350,
+        {
+          device_timestamp: 1735261201001,
+          speed: 0,
+          ignition: true,
+          level: 350,
+        },
+      ],
+      [
+        1735261221000,
+        310.87,
+        {
+          device_timestamp: 1735261221000,
+          speed: 0,
+          ignition: false,
+          level: 310.87,
+        },
+      ],
+      [
+        1735261241000,
+        271.74,
+        {
+          device_timestamp: 1735261241000,
+          speed: 0,
+          ignition: false,
+          level: 271.74,
+        },
+      ],
+      [
+        1735261261000,
+        249,
+        {
+          device_timestamp: 1735261261000,
+          speed: 0,
+          ignition: false,
+          level: 249,
+        },
+      ],
+      [
+        1735261281000,
+        246.75,
+        {
+          device_timestamp: 1735261281000,
+          speed: 0,
+          ignition: false,
+          level: 246.75,
+        },
+      ],
+      [
+        1735261301000,
+        244.5,
+        {
+          device_timestamp: 1735261301000,
+          speed: 0,
+          ignition: false,
+          level: 244.5,
+        },
+      ],
+    ],
+  },
+  {
+    type: "line",
+    lineStyle: {
+      type: "solid",
+      color: "blue",
+    },
+    symbol: "none",
+    areaStyle: {
+      color: {
+        colorStops: [
+          {
+            offset: 0,
+            color: "#ACD4FD",
+          },
+          {
+            offset: 1,
+            color: "#F5FAFF",
+          },
+        ],
+        x: 0,
+        y: 0,
+        x2: 0,
+        y2: 1,
+        type: "linear",
+        global: false,
+      },
+    },
+    data: [
+      [
+        1735261301000,
+        244.5,
+        {
+          device_timestamp: 1735261301001,
+          speed: 0,
+          ignition: false,
+          level: 244.5,
+        },
+      ],
+      [
+        1735261321000,
+        242.25,
+        {
+          device_timestamp: 1735261321000,
+          speed: 0,
+          ignition: true,
+          level: 242.25,
+        },
+      ],
+      [
+        1735261341000,
+        240,
+        {
+          device_timestamp: 1735261341000,
+          speed: 0,
+          ignition: true,
+          level: 240,
+        },
+      ],
+    ],
+  },
+  {
+    type: "line",
+    lineStyle: {
+      type: "solid",
+      color: "red",
+    },
+    // symbol: "triangle",
+    symbol: `image://src/component/img/logogoogle.svg`,
+    symbolSize: 20,
+    data: [
+      [
+        1735260001000,
+        225.75,
+        {
+          device_timestamp: 1735260001000,
+          speed: 0,
+          ignition: false,
+          level: 225.75,
+          isLowNetwork: true,
+          status: "REFUELING",
+          address:
+            "Coimbatore - Nagapattinam Hwy, Annai Meena Nagar, Alangudi Bit, Punnainallur, Tamil Nadu 613501",
+          fuel_reading_count: "236.75 L",
+          status_display_text: "Refuel",
+          end_time: null,
+          start_time: null,
+        },
+      ],
+    ],
+    areaStyle: {
+      color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+        { offset: 0, color: "#ACD4FD" },
+        { offset: 1, color: "#F5FAFF" },
+      ]),
+    },
+  },
+];
+
+const lowNetworkOnes = [
+  {
+    type: "line",
+    lineStyle: {
+      type: "dashed", // Dashed gray line
+      color: "gray",
+    },
+    symbol: "none",
+    areaStyle: {
+      color: "white",
+    },
+    data: [
+      [
+        1735260001000,
+        // (x-ordinate i.e. device_timestamp),
+        225.75,
+        // (y-ordinate i.e. level, so will look in data for same device_timestamp and use the level from there.)
+        {
+          device_timestamp: 1735260001001,
+          // (came from 1735260001000+1)
+        },
+      ],
+      [
+        1735260601000,
+        // (comes from (1735260001000+1735261201000)/2),
+        287.875,
+        // (comes from (350+225.75)/2, 350 if fuel level of 1735261201000 and 225.75 is of 1735260001000)
+        {
+          device_timestamp: 1735260601001,
+          // (came from 1735260601000+1)
+        },
+      ],
+    ],
+  },
+  {
+    type: "line",
+    lineStyle: {
+      type: "dashed", // Dashed gray line
+      color: "gray",
+    },
+    symbol: "none",
+    areaStyle: {
+      color: "white",
+    },
+    data: [
+      [
+        1735260601000,
+        // (comes from (1735260001000+1735261201000)/2),
+        287.875,
+        // (comes from (350+225.75)/2, 350 if fuel level of 1735261201000 and 225.75 is of 1735260001000)
+        {
+          device_timestamp: 1735260601000,
+          start_time: 1735260001000,
+          end_time: 1735261201000,
+          status: "LOW_NETWORK",
+        },
+      ],
+    ],
+  },
+  {
+    type: "line",
+    lineStyle: {
+      type: "dashed", // Dashed gray line
+      color: "gray",
+    },
+    symbol: "none",
+    areaStyle: {
+      color: "white",
+    },
+    data: [
+      [
+        1735260601000,
+        // (comes from (1735260001000+1735261201000)/2),
+        287.875,
+        // (comes from (350+225.75)/2, 350 if fuel level of 1735261201000 and 225.75 is of 1735260001000)
+        {
+          device_timestamp: 1735260601001,
+        },
+      ],
+      [
+        1735261201000,
+        // (x-ordinate i.e. device_timestamp),
+        350,
+        // (y-ordinate i.e. level, so will look in data for same device_timestamp and use the level from there.)
+        {
+          device_timestamp: 17352612010001,
+          // (came from 1735261201000+1)
+        },
+      ],
+    ],
   },
 ];
