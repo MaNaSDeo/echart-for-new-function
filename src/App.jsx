@@ -4,20 +4,20 @@ import {
   // testModifiedData,
   transformData,
 } from "./helperFunctions";
-import { originalData } from "./fakeData";
+// import { modifiedData as data } from "./compareData";
+import { originalData, low_network_plots, fuel_timeline } from "./fakeData";
 import { useEffect, useState } from "react";
 
 function App() {
   const [data, setData] = useState([]);
   useEffect(() => {
-    setData(transformData(originalData));
+    setData(transformData(originalData, low_network_plots, fuel_timeline));
   }, []);
 
   console.log("data", { data });
 
   const option = {
     title: { text: "Fuel Level Over Time" },
-    tooltip: { trigger: "axis" },
     toolbox: {
       show: false,
     },
@@ -38,6 +38,41 @@ function App() {
       },
     },
     series: data,
+    tooltip: {
+      trigger: "axis",
+      formatter: function (params) {
+        console.log("params", {
+          params,
+          value: params[0]?.value,
+          obj: params[0]?.value?.[2],
+        });
+        const tooltipLines = params.map((item) => {
+          const { seriesName, data } = item;
+          console.log("seriesName, data", { seriesName, data });
+          const time = data?.[0];
+          const value = data?.[1];
+          const deviceTime = data[2]?.device_timestamp
+            ? new Date(data.device_timestamp).toLocaleString()
+            : "N/A";
+
+          console.log("seriesName, data", {
+            time,
+            value,
+            deviceTime,
+            seriesName,
+            data,
+          });
+
+          return `
+            <strong>${seriesName}</strong><br/>
+            Value: ${value} L<br/>
+            Time: ${time}<br/>
+            Device Timestamp: ${deviceTime}
+          `;
+        });
+        return tooltipLines.join("<br/><br/>");
+      },
+    },
   };
   return (
     <div>

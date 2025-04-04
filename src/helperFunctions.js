@@ -555,6 +555,7 @@ const lowNetworkOnes = [
     ],
   },
 ];
+
 /**
  * Transforms the original data based on ignition changes, low network plots, and fuel timeline events
  * @param {Array} data - The original data array
@@ -619,6 +620,15 @@ export function transformData(data, lowNetworkPlots, fuelTimeline) {
     timestampToLevelMap.set(item.device_timestamp, item.level);
   });
 
+  console.log("first", {
+    normalizedFuelTimeline,
+    normalizedLowNetworkPlots,
+    normalizedData,
+    data,
+    lowNetworkPlots,
+    fuelTimeline,
+  });
+
   // Step 3: Create a function to check if a timestamp is in a low network period
   const isInLowNetworkPeriod = (timestamp) => {
     if (
@@ -652,7 +662,7 @@ export function transformData(data, lowNetworkPlots, fuelTimeline) {
   // Create data series with breaks at low network periods
   let currentSeries = [];
   let currentIgnitionState = normalizedData[0].ignition;
-  let seriesColor = currentIgnitionState ? "blue" : "yellow";
+  let seriesColor = currentIgnitionState ? "blue" : "green";
 
   // Create the first data point
   currentSeries.push([
@@ -668,18 +678,26 @@ export function transformData(data, lowNetworkPlots, fuelTimeline) {
 
     // Check if this point is in a low network period
     const inLowNetwork = isInLowNetworkPeriod(currentData.device_timestamp);
+    console.log("inLowNetwork", { inLowNetwork, currentData, prevData });
 
     // Check if we need to break the series due to low network period
     const shouldBreakForLowNetwork = normalizedLowNetworkPlots.some(
       (period) => {
         return (
-          (prevData.device_timestamp < period.start_time &&
-            currentData.device_timestamp > period.end_time) ||
-          (prevData.device_timestamp < period.end_time &&
-            currentData.device_timestamp > period.end_time)
+          prevData.device_timestamp === period.start_time &&
+          currentData.device_timestamp === period.end_time
+          //     ||
+          //   (prevData.device_timestamp < period.end_time &&
+          //     currentData.device_timestamp > period.end_time)
         );
       }
     );
+
+    console.log("shouldBreakForLowNetwork", {
+      shouldBreakForLowNetwork,
+      currentData,
+      prevData,
+    });
 
     // Check if ignition state has changed
     if (
@@ -687,6 +705,13 @@ export function transformData(data, lowNetworkPlots, fuelTimeline) {
       shouldBreakForLowNetwork
     ) {
       // Finalize the current series
+      console.log("breakSeries", {
+        currentData,
+        prevData,
+        currentSeries,
+        currentIgnitionState,
+        shouldBreakForLowNetwork,
+      });
       if (currentSeries.length > 0) {
         result.push(createSeriesObject(currentSeries, seriesColor));
         currentSeries = [];
@@ -694,7 +719,7 @@ export function transformData(data, lowNetworkPlots, fuelTimeline) {
 
       // Update current ignition state and color
       currentIgnitionState = currentData.ignition;
-      seriesColor = currentIgnitionState ? "blue" : "yellow";
+      seriesColor = currentIgnitionState ? "blue" : "green";
     }
 
     // Add current data point to the current series
@@ -702,6 +727,8 @@ export function transformData(data, lowNetworkPlots, fuelTimeline) {
       ...currentData,
       isLowNetwork: inLowNetwork,
     };
+
+    console.log("dataObj", { dataObj });
 
     currentSeries.push([
       currentData.device_timestamp,
@@ -858,8 +885,10 @@ function createFuelTimelineSeries(
       // Determine which logo to use based on the status in the data
       const dataPoint = params.data[2];
       return dataPoint && dataPoint.status === "REFUELING"
-        ? "image://src/component/img/refuelLogo.svg"
-        : "image://src/component/img/theftLogo.svg";
+        ? // ? "image://src/component/img/refuelLogo.svg"
+          // : "image://src/component/img/theftLogo.svg";
+          "image://src/component/img/logogoogle.svg"
+        : "image://src/component/img/logogoogle.svg";
     },
     symbolSize: 20,
     data: fuelEventPoints,
@@ -937,7 +966,7 @@ function createLowNetworkSeries(lowNetworkPlots, timestampToLevelMap) {
       type: "line",
       lineStyle: {
         type: "dashed",
-        color: "gray",
+        color: "red",
       },
       symbol: "none",
       areaStyle: {
@@ -966,7 +995,7 @@ function createLowNetworkSeries(lowNetworkPlots, timestampToLevelMap) {
       type: "line",
       lineStyle: {
         type: "dashed",
-        color: "gray",
+        color: "red",
       },
       symbol: "none",
       areaStyle: {
@@ -991,7 +1020,7 @@ function createLowNetworkSeries(lowNetworkPlots, timestampToLevelMap) {
       type: "line",
       lineStyle: {
         type: "dashed",
-        color: "gray",
+        color: "red",
       },
       symbol: "none",
       areaStyle: {
