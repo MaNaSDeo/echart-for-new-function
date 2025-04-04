@@ -555,7 +555,6 @@ const lowNetworkOnes = [
     ],
   },
 ];
-
 /**
  * Transforms the original data based on ignition changes, low network plots, and fuel timeline events
  * @param {Array} data - The original data array
@@ -568,42 +567,90 @@ export function transformData(data, lowNetworkPlots, fuelTimeline) {
     return [];
   }
 
-  // Step 1: Create a set of fuel timeline timestamps
-  const fuelTimelineTimestamps = new Set();
+  // Step 1: Round timestamps to multiples of 1000 for all inputs
+  // For data
+  const normalizedData = data.map((item) => {
+    // Round the timestamp to nearest 1000
+    const roundedTimestamp = Math.floor(item.device_timestamp / 1000) * 1000;
+
+    // Adjust level if it's 0
+    //   const adjustedLevel = item.level === 0 ? 0.001 : item.level;
+
+    return {
+      ...item,
+      device_timestamp: roundedTimestamp,
+      // level: adjustedLevel,
+    };
+  });
+  // Sort by device_timestamp
+  // .sort((a, b) => a.device_timestamp - b.device_timestamp);
+
+  // For fuelTimeline
+  let normalizedFuelTimeline = [];
   if (fuelTimeline && Array.isArray(fuelTimeline)) {
-    fuelTimeline.forEach((event) => {
+    normalizedFuelTimeline = fuelTimeline.map((event) => {
       if (event.start_location && event.start_location.device_timestamp) {
-        fuelTimelineTimestamps.add(event.start_location.device_timestamp);
+        return {
+          ...event,
+          start_location: {
+            ...event.start_location,
+            device_timestamp:
+              Math.floor(event.start_location.device_timestamp / 1000) * 1000,
+          },
+        };
       }
+      return event;
     });
   }
 
-  // Step 2: Process and normalize the data
-  const normalizedData = data
-    .map((item) => {
-      // Round the timestamp to nearest 1000
-      const roundedTimestamp = Math.floor(item.device_timestamp / 1000) * 1000;
+  // For lowNetworkPlots
+  let normalizedLowNetworkPlots = [];
+  if (lowNetworkPlots && Array.isArray(lowNetworkPlots)) {
+    normalizedLowNetworkPlots = lowNetworkPlots.map((period) => ({
+      ...period,
+      start_time: Math.floor(period.start_time / 1000) * 1000,
+      end_time: Math.floor(period.end_time / 1000) * 1000,
+    }));
+  }
 
-      // Adjust level if it's 0
-      const adjustedLevel = item.level === 0 ? 0.001 : item.level;
+  // Step 2: Create a map of timestamps to level values for quick lookup
+  const timestampToLevelMap = new Map();
+  normalizedData.forEach((item) => {
+    timestampToLevelMap.set(item.device_timestamp, item.level);
+  });
 
-      return {
-        ...item,
-        device_timestamp: roundedTimestamp,
-        level: adjustedLevel,
-      };
-    })
-    // Sort by device_timestamp
-    .sort((a, b) => a.device_timestamp - b.device_timestamp);
+  // Step 3: Create a function to check if a timestamp is in a low network period
+  const isInLowNetworkPeriod = (timestamp) => {
+    if (
+      !normalizedLowNetworkPlots ||
+      !Array.isArray(normalizedLowNetworkPlots)
+    ) {
+      return false;
+    }
 
-  // Step 3: Transform the data
-  let result = [];
-  let currentSeries = [];
+    return normalizedLowNetworkPlots.some(
+      (period) => timestamp >= period.start_time && timestamp <= period.end_time
+    );
+  };
+
+  // Step 4: Create a function to get level for a timestamp
+  const getLevelForTimestamp = (timestamp) => {
+    if (timestampToLevelMap.has(timestamp)) {
+      return timestampToLevelMap.get(timestamp);
+    }
+
+    return 0; // Default to 0 if no timestamp is found
+  };
+
+  // Step 5: Transform the main data with consideration for low network periods
+  const result = [];
 
   if (normalizedData.length === 0) {
     return result;
   }
 
+  // Create data series with breaks at low network periods
+  let currentSeries = [];
   let currentIgnitionState = normalizedData[0].ignition;
   let seriesColor = currentIgnitionState ? "blue" : "yellow";
 
@@ -619,37 +666,43 @@ export function transformData(data, lowNetworkPlots, fuelTimeline) {
     const currentData = normalizedData[i];
     const prevData = normalizedData[i - 1];
 
-    // Check if ignition state has changed
-    if (currentData.ignition !== currentIgnitionState) {
-      // Finalize the current series
-      result.push(createSeriesObject(currentSeries, seriesColor));
+    // Check if this point is in a low network period
+    const inLowNetwork = isInLowNetworkPeriod(currentData.device_timestamp);
 
-      // Start a new series with a copy of the last point but with timestamp + 1
-      const lastPoint = currentSeries[currentSeries.length - 1];
-      const continuityPoint = [
-        lastPoint[0],
-        lastPoint[1],
-        {
-          ...lastPoint[2],
-          device_timestamp: lastPoint[2].device_timestamp + 1,
-        },
-      ];
+    // Check if we need to break the series due to low network period
+    const shouldBreakForLowNetwork = normalizedLowNetworkPlots.some(
+      (period) => {
+        return (
+          (prevData.device_timestamp < period.start_time &&
+            currentData.device_timestamp > period.end_time) ||
+          (prevData.device_timestamp < period.end_time &&
+            currentData.device_timestamp > period.end_time)
+        );
+      }
+    );
+
+    // Check if ignition state has changed
+    if (
+      currentData.ignition !== currentIgnitionState ||
+      shouldBreakForLowNetwork
+    ) {
+      // Finalize the current series
+      if (currentSeries.length > 0) {
+        result.push(createSeriesObject(currentSeries, seriesColor));
+        currentSeries = [];
+      }
 
       // Update current ignition state and color
       currentIgnitionState = currentData.ignition;
       seriesColor = currentIgnitionState ? "blue" : "yellow";
-
-      // Start new series with the continuity point
-      currentSeries = [continuityPoint];
-    }
-
-    // Special case: if this timestamp is in fuel timeline, adjust the device_timestamp in the data object
-    let dataObj = { ...currentData };
-    if (fuelTimelineTimestamps.has(currentData.device_timestamp)) {
-      dataObj.device_timestamp = currentData.device_timestamp - 1;
     }
 
     // Add current data point to the current series
+    const dataObj = {
+      ...currentData,
+      isLowNetwork: inLowNetwork,
+    };
+
     currentSeries.push([
       currentData.device_timestamp,
       currentData.level,
@@ -663,16 +716,23 @@ export function transformData(data, lowNetworkPlots, fuelTimeline) {
   }
 
   // Step 6: Generate fuel timeline events series
-  if (fuelTimeline && Array.isArray(fuelTimeline) && fuelTimeline.length > 0) {
+  if (normalizedFuelTimeline && normalizedFuelTimeline.length > 0) {
     const fuelEventSeries = createFuelTimelineSeries(
-      fuelTimeline,
+      normalizedFuelTimeline,
       timestampToLevelMap,
       isInLowNetworkPeriod
     );
     result.push(fuelEventSeries);
   }
 
-  result = [...result, lowNetworkOnes];
+  // Step 7: Generate low network plots series
+  if (normalizedLowNetworkPlots && normalizedLowNetworkPlots.length > 0) {
+    const lowNetworkSeries = createLowNetworkSeries(
+      normalizedLowNetworkPlots,
+      timestampToLevelMap
+    );
+    result.push(...lowNetworkSeries);
+  }
 
   return result;
 }
@@ -713,24 +773,6 @@ function createSeriesObject(dataPoints, color) {
     },
     data: dataPoints,
   };
-}
-
-// Example usage:
-export const testModifiedData = transformData(data);
-
-function randomizeIgnition(data) {
-  let currentState = Math.random() < 0.5; // Randomly start with true or false
-  let remainingCount = Math.floor(Math.random() * 8) + 3; // Between 3 and 10
-
-  return data.map((entry, index) => {
-    if (remainingCount === 0) {
-      currentState = !currentState; // Toggle ignition state
-      remainingCount = Math.floor(Math.random() * 8) + 3; // Reset counter
-    }
-
-    remainingCount--;
-    return { ...entry, ignition: currentState };
-  });
 }
 
 /**
@@ -784,10 +826,8 @@ function createFuelTimelineSeries(
     // Get the logo based on status
     const logo =
       event.status === "REFUELING"
-        ? // ? "image://src/component/img/refuelLogo.svg"
-          // : "image://src/component/img/theftLogo.svg";
-          `image://src/component/img/logogoogle.svg`
-        : `image://src/component/img/logogoogle.svg`;
+        ? "image://src/component/img/refuelLogo.svg"
+        : "image://src/component/img/theftLogo.svg";
 
     // Create the point data object
     const pointData = {
@@ -824,7 +864,160 @@ function createFuelTimelineSeries(
     symbolSize: 20,
     data: fuelEventPoints,
     areaStyle: {
-      color: "white", // White area style for fuel events
+      color: {
+        colorStops: [
+          {
+            offset: 0,
+            color: "#ACD4FD",
+          },
+          {
+            offset: 1,
+            color: "#F5FAFF",
+          },
+        ],
+        x: 0,
+        y: 0,
+        x2: 0,
+        y2: 1,
+        type: "linear",
+        global: false,
+      },
     },
   };
+}
+
+/**
+ * Creates series for low network plots
+ * @param {Array} lowNetworkPlots - The low network plot periods
+ * @param {Map} timestampToLevelMap - Map of timestamps to level values
+ * @returns {Array} Array of low network series objects
+ */
+function createLowNetworkSeries(lowNetworkPlots, timestampToLevelMap) {
+  const lowNetworkSeries = [];
+
+  lowNetworkPlots.forEach((period) => {
+    const startTime = period.start_time;
+    const endTime = period.end_time;
+    const midTime = Math.floor((startTime + endTime) / 2);
+
+    // Get levels for start and end points based on the specific edge case handling
+    let startLevel, endLevel;
+
+    // If start_time is in the data, use its level
+    if (timestampToLevelMap.has(startTime)) {
+      startLevel = timestampToLevelMap.get(startTime);
+    }
+    // If start_time is not in data, check if end_time is in data
+    else if (timestampToLevelMap.has(endTime)) {
+      startLevel = timestampToLevelMap.get(endTime);
+    }
+    // If neither is in data, default to 0
+    else {
+      startLevel = 0;
+    }
+
+    // If end_time is in the data, use its level
+    if (timestampToLevelMap.has(endTime)) {
+      endLevel = timestampToLevelMap.get(endTime);
+    }
+    // If end_time is not in data, check if start_time is in data
+    else if (timestampToLevelMap.has(startTime)) {
+      endLevel = timestampToLevelMap.get(startTime);
+    }
+    // If neither is in data, default to 0
+    else {
+      endLevel = 0;
+    }
+
+    // Calculate midpoint level
+    const midLevel = (startLevel + endLevel) / 2;
+
+    // Create first segment (start to mid)
+    const firstSegment = {
+      type: "line",
+      lineStyle: {
+        type: "dashed",
+        color: "gray",
+      },
+      symbol: "none",
+      areaStyle: {
+        color: "white",
+      },
+      data: [
+        [
+          startTime,
+          startLevel,
+          {
+            device_timestamp: startTime + 1,
+          },
+        ],
+        [
+          midTime,
+          midLevel,
+          {
+            device_timestamp: midTime + 1,
+          },
+        ],
+      ],
+    };
+
+    // Create middle point with status
+    const midPoint = {
+      type: "line",
+      lineStyle: {
+        type: "dashed",
+        color: "gray",
+      },
+      symbol: "none",
+      areaStyle: {
+        color: "white",
+      },
+      data: [
+        [
+          midTime,
+          midLevel,
+          {
+            device_timestamp: midTime,
+            start_time: startTime,
+            end_time: endTime,
+            status: "LOW_NETWORK",
+          },
+        ],
+      ],
+    };
+
+    // Create second segment (mid to end)
+    const secondSegment = {
+      type: "line",
+      lineStyle: {
+        type: "dashed",
+        color: "gray",
+      },
+      symbol: "none",
+      areaStyle: {
+        color: "white",
+      },
+      data: [
+        [
+          midTime,
+          midLevel,
+          {
+            device_timestamp: midTime + 1,
+          },
+        ],
+        [
+          endTime,
+          endLevel,
+          {
+            device_timestamp: endTime + 1,
+          },
+        ],
+      ],
+    };
+
+    // Add all segments to the result
+    lowNetworkSeries.push(firstSegment, midPoint, secondSegment);
+  });
+
+  return lowNetworkSeries;
 }
