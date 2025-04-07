@@ -1,5 +1,6 @@
 import ReactECharts from "echarts-for-react";
 import {
+  normalizeData,
   // modifiedData as data,
   // testModifiedData,
   transformData,
@@ -10,8 +11,10 @@ import { useEffect, useState } from "react";
 
 function App() {
   const [data, setData] = useState([]);
+  normalizeData(originalData, low_network_plots);
   useEffect(() => {
-    setData(transformData(originalData, low_network_plots, fuel_timeline));
+    // setData(transformData(originalData, low_network_plots, fuel_timeline));
+    setData(normalizeData(originalData, low_network_plots));
   }, []);
 
   console.log("data", { data });
@@ -51,14 +54,10 @@ function App() {
           console.log("seriesName, data", { seriesName, data });
           const time = data?.[0];
           const value = data?.[1];
-          const deviceTime = data[2]?.device_timestamp
-            ? new Date(data.device_timestamp).toLocaleString()
-            : "N/A";
 
           console.log("seriesName, data", {
             time,
             value,
-            deviceTime,
             seriesName,
             data,
           });
@@ -67,7 +66,6 @@ function App() {
             <strong>${seriesName}</strong><br/>
             Value: ${value} L<br/>
             Time: ${time}<br/>
-            Device Timestamp: ${deviceTime}
           `;
         });
         return tooltipLines.join("<br/><br/>");

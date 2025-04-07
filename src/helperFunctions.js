@@ -1,5 +1,104 @@
 import * as echarts from "echarts";
 
+const statusColorMap = {
+  LOW_NETWORK: "pink",
+  INGNITION_ON: "red",
+  IGNITION_OFF: "green",
+};
+
+export function formatGraphData(dataPoints, category) {
+  return {
+    type: "line",
+    lineStyle: {
+      type: category === "LOW_NETWORK" ? "dashed" : "solid",
+      color: statusColorMap[category],
+    },
+    symbol: "none",
+    areaStyle:
+      category === "LOW_NETWORK"
+        ? { color: "white" }
+        : {
+            color: {
+              colorStops: [
+                {
+                  offset: 0,
+                  color: "#ACD4FD",
+                },
+                {
+                  offset: 1,
+                  color: "#F5FAFF",
+                },
+              ],
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              type: "linear",
+              global: false,
+            },
+          },
+    data: dataPoints,
+  };
+}
+
+export function normalizeData(data, lowNetworkPlots) {
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return [];
+  }
+
+  const isInLowNetworkPeriod = (timestamp) => {
+    if (!lowNetworkPlots || !Array.isArray(lowNetworkPlots)) {
+      return false;
+    }
+
+    return lowNetworkPlots.some(
+      (period) => timestamp >= period.start_time && timestamp <= period.end_time
+    );
+  };
+
+  const newData = data
+    .map((point) => {
+      const isLowNetwork = isInLowNetworkPeriod(point.device_timestamp);
+      return {
+        device_timestamp: Math.floor(point.device_timestamp / 1000) * 1000,
+        category: isLowNetwork
+          ? "LOW_NETWORK"
+          : point.ignition
+          ? "INGNITION_ON"
+          : "IGNITION_OFF",
+        level: point.level,
+        data: point,
+      };
+    })
+    .sort((b, a) => b.device_timestamp - a.device_timestamp);
+
+  const finalData = [];
+  let temp = [];
+  for (let i = 0; i < newData.length; i++) {
+    const point = newData[i];
+    if (i === 0) {
+      temp.push([point.device_timestamp, point.level, point.data]);
+      continue;
+    }
+
+    const prev = newData[i - 1];
+
+    if (point.category !== prev.category) {
+      finalData.push(formatGraphData(temp, prev.category));
+      temp = [[prev.device_timestamp, prev.level, prev.data]];
+    }
+    temp.push([point.device_timestamp, point.level, point.data]);
+
+    if (i == newData.length - 1) {
+      finalData.push(
+        formatGraphData(temp, newData[newData.length - 1].category)
+      );
+    }
+  }
+
+  return finalData;
+}
+
 /**
  * Transforms the original data based on ignition changes, low network plots, and fuel timeline events
  * @param {Array} data - The original data array
